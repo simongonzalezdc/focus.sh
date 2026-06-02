@@ -28,7 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Lint
-        uses: golangci/golangci-lint-action@v9.2.1
+        uses: golangci/golangci-lint-action@v6
         with:
           version: v1.64.8
           args: --timeout=5m
