@@ -1686,10 +1686,6 @@ func (m *MainModel) renderFocusView() string {
 	return b.String()
 }
 
-
-
-
-
 func (m *MainModel) renderDashboard() string {
 	var b strings.Builder
 

@@ -11,14 +11,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        go: [ '1.22.x' ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Setup Go
         uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
-          go-version: ${{ matrix.go }}
+          go-version-file: go.mod
       - name: Cache go modules
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -28,13 +27,11 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Install golangci-lint
-        uses: golangci/golangci-lint-action@55c2c1448f86e01eaae002a5a3a9624417608d84 # v6
-        with:
-          version: latest
-          args: --version
       - name: Lint
-        run: golangci-lint run
+        uses: golangci/golangci-lint-action@v9.2.1
+        with:
+          version: v1.64.8
+          args: --timeout=5m
       - name: Vet
         run: go vet ./...
       - name: Test
