@@ -107,7 +107,7 @@ func (js *JournalStorage) SaveEntries(entries []*models.JournalEntry) error {
 		return fmt.Errorf("failed to create journal directory: %w", err)
 	}
 
-	if err := os.WriteFile(js.filePath, data, 0644); err != nil {
+	if err := os.WriteFile(js.filePath, data, 0o644); err != nil {
 		return fmt.Errorf("failed to write journal file: %w", err)
 	}
 
@@ -126,14 +126,15 @@ func (js *JournalStorage) SaveEntries(entries []*models.JournalEntry) error {
 
 // flushCache saves cache to disk (called when cache is dirty)
 func (js *JournalStorage) flushCache() error {
-	js.cacheMutex.RLock()
+	js.cacheMutex.Lock()
+	defer js.cacheMutex.Unlock()
+
 	if !js.cacheDirty {
-		js.cacheMutex.RUnlock()
 		return nil
 	}
+
 	entries := make([]*models.JournalEntry, len(js.cache))
 	copy(entries, js.cache)
-	js.cacheMutex.RUnlock()
 
 	data, err := json.MarshalIndent(entries, "", "  ")
 	if err != nil {
@@ -146,13 +147,11 @@ func (js *JournalStorage) flushCache() error {
 		return fmt.Errorf("failed to create journal directory: %w", err)
 	}
 
-	if err := os.WriteFile(js.filePath, data, 0644); err != nil {
+	if err := os.WriteFile(js.filePath, data, 0o644); err != nil {
 		return fmt.Errorf("failed to write journal file: %w", err)
 	}
 
-	js.cacheMutex.Lock()
 	js.cacheDirty = false
-	js.cacheMutex.Unlock()
 
 	return nil
 }
